@@ -1,0 +1,12 @@
+README
+
+This project is an attempt to use Scanpy's library to analize cell data that we have after preforming dropseq on cells
+
+Currently the program pulls from our own cell data, but it mostly follows the scanpy tutorial
+The Scanpy tutorial for clustering that this follows is located here: 
+https://scanpy-tutorials.readthedocs.io/en/latest/pbmc3k.html
+
+I am mostly running this through the terminal as I SSH into a remote workstation that has all the cell data, so it is really meant to be run line by line, or section by section rather than as a full on .py file
+
+Current Problems:
+I cannont seem to get the program to produce the plots.  I am unsure if this is because they are displaying on the remote system and are therefore unviewable to me at my workstation, or if I am improperly writing the plotting functions.
