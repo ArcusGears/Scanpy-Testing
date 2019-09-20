@@ -202,3 +202,7 @@ adata
 
 #write to results file
 adata.write(results_file, compression = 'gzip')
+
+#version with raw data for visualizations, but removed the dense scaled and corrected data
+adata.X = None
+adata.write('./write/pbmc3k_withoutX.h5ad', compression = 'gzip')
