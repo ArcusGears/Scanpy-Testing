@@ -28,7 +28,7 @@ adata.var_names_make_unique()  #unnecessary if using 'gene_ids'
 adata
 
 #show genes that yeild highest fraction of counts in each single cells across all cells
-sc.pl.highest_expr_genes(adata, n_top = 20)
+sc.pl.highest_expr_genes(adata, n_top = 20, save = True)
 
 #basic filtering to remove genes that are detected in less than 3 cells
 sc.pp.filter_cells(adata, min_genes = 200)
@@ -44,11 +44,11 @@ adata.obs['percent_mito'] = np.sum (
 adata.obs['n_counts'] = adata.X.sum(axis = 1).A1
 
 #make a violin plot
-sc.pl.violin(adata, ['n_genes', 'n_counts', 'percent_mito'], jitter = 0.4, multi_panel = True)
+sc.pl.violin(adata, ['n_genes', 'n_counts', 'percent_mito'], jitter = 0.4, multi_panel = True, save = True)
 
 #removing cells that have too many mitochondrial genes expressed or too many total counts
-sc.pl.scatter(adata, x = 'n_counts', y = 'percent_mito')
-sc.pl.scatter(adata, x = 'n_counts', y = 'n_genes')
+sc.pl.scatter(adata, x = 'n_counts', y = 'percent_mito', save = True)
+sc.pl.scatter(adata, x = 'n_counts', y = 'n_genes', save = True)
 
 adata
 
@@ -69,7 +69,7 @@ adata.raw = adata
 sc.pp.highly_variable_genes(adata, min_mean = 0.0125, max_mean = 3, min_disp = 0.5)
 
 #plots
-sc.pl.highly_variable_genes(adata)
+sc.pl.highly_variable_genes(adata, save = True)
 
 
 #filters for highly variable genes
@@ -87,11 +87,11 @@ sc.pp.scale(adata, max_value = 10)
 sc.tl.pca(adata, svd_solver = 'arpack')
 
 #scatter plot in PCA coordinates
-sc.pl.pca(adata, color = 'CST3')
+sc.pl.pca(adata, color = 'CST3', save = True)
 
 #Contribution of single PCs to total variance
 #Consider how many PCs we should consider in order to computer the neighborhood relations of cells
-sc.pl.pca_variance_ratio(adata, log = True)
+sc.pl.pca_variance_ratio(adata, log = True, save = True)
 
 #save result
 adata.write(results_file)
@@ -113,10 +113,10 @@ sc.pp.neighbors(adata, n_neighbors = 10, n_pcs = 40)
 #tl.umap(adata, init_pos = 'paga')
 
 sc.tl.umap(adata)
-sc.pl.umap(adata, color = ['CST3', 'NKG7', 'PPBP'])
+sc.pl.umap(adata, color = ['CST3', 'NKG7', 'PPBP'], save = True)
 
 #plot not using the .raw
-sc.pl.umap(adata, color = ['SCT3', 'NKG7', 'PPBP'], use_raw = False)
+sc.pl.umap(adata, color = ['SCT3', 'NKG7', 'PPBP'], use_raw = False, save = True)
 
 
 #clustering the graph
@@ -124,7 +124,7 @@ sc.pl.umap(adata, color = ['SCT3', 'NKG7', 'PPBP'], use_raw = False)
 sc.tl.louvain(adata)
 
 #plot
-sc.pl.umap(adata, color = ['louvain', 'CST3', 'NKG7'])
+sc.pl.umap(adata, color = ['louvain', 'CST3', 'NKG7'], sve = True)
 
 #save
 adata.write(results_file)
@@ -135,21 +135,21 @@ adata.write(results_file)
 #Ranking for the highly differential genes in each cluster
 #Uses the .raw attribute
 sc.tl.rank_genes_groups(adata, 'louvain', method = 't-test')
-sc.pl.rank_genes_groups(adata, n_genes = 25, sharey = False)
+sc.pl.rank_genes_groups(adata, n_genes = 25, sharey = False, save = True)
 
 #reduce verbosity
 sc.settings.verbosity = 2
 
 #wilcox test version
 sc.tl.rank_genes_groups(adata, 'louvain', method = 'wilcoxon')
-sc.pl.rank_genes_groups(adata, n_genes = 25, sharey = False)
+sc.pl.rank_genes_groups(adata, n_genes = 25, sharey = False, save = True)
 
 #save result
 adata.write(results_file)
 
 #logistic regression ranking
 sc.tl.rank_genes_groups(adata, 'louvain', method = 'logreg')
-sc.pl.rank_genes_groups(adata, n_genes = 25, sharey = False)
+sc.pl.rank_genes_groups(adata, n_genes = 25, sharey = False, save = True)
 
 #list of marker genes
 #currently is the default list from the tutorial, consider changing
@@ -170,17 +170,17 @@ pd.DataFrame(
 
 #compare to a single cluster
 sc.tl.rank_genes_groups(adata, 'louvain', groups = ['0'], refrence = '1', method = 'wilcoxon')
-sc.pl.rank_genes_groups(adata, groups = ['0'], n_genes = 20)
+sc.pl.rank_genes_groups(adata, groups = ['0'], n_genes = 20, save = True)
 
 #violin plot for more detailed view
-sc.pl.rank_genes_groups_violin(adata, groups = '0', n_genes = 8)
+sc.pl.rank_genes_groups_violin(adata, groups = '0', n_genes = 8, save = True)
 
 #reload object with computed diff expression
 adata = sc.read(results_file)
-sc.pl.rank_genes_groups_violin(adata, groups = '0', n_genes = 8)
+sc.pl.rank_genes_groups_violin(adata, groups = '0', n_genes = 8, save = True)
 
 #How to compare a certain gene across groups
-sc.pl.violin(adata, ['CST3', 'NKG7', 'PPBP'], groupby = 'louvain')
+sc.pl.violin(adata, ['CST3', 'NKG7', 'PPBP'], groupby = 'louvain', save = True)
 
 #mark the cell types
 #new_cluster_names = [
@@ -192,10 +192,10 @@ sc.pl.violin(adata, ['CST3', 'NKG7', 'PPBP'], groupby = 'louvain')
 #sc.pl.umap(adata, color = 'louvain', legend_loc = 'on data', title = '', frameon = False, save = '.pdf')
 
 #visualize marker genes
-ax = sc.pl.dotplot(adata, marker_genes, groupby = 'louvain')
+ax = sc.pl.dotplot(adata, marker_genes, groupby = 'louvain', save = True)
 
 #compact violin plot
-ax = sc.pl.stacked_violin(adata, marker_genes, groupby = 'louvain', rotation = 90)
+ax = sc.pl.stacked_violin(adata, marker_genes, groupby = 'louvain', rotation = 90, save = True)
 
 #view adata and it's annotations
 adata
