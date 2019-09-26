@@ -9,4 +9,6 @@ https://scanpy-tutorials.readthedocs.io/en/latest/pbmc3k.html
 I am mostly running this through the terminal as I SSH into a remote workstation that has all the cell data, so it is really meant to be run line by line, or section by section rather than as a full on .py file
 
 Current Problems:
-I cannont seem to get the program to produce the plots.  I am unsure if this is because they are displaying on the remote system and are therefore unviewable to me at my workstation, or if I am improperly writing the plotting functions.
+1. Why do the genes appear as numbers (see "highest expression" graph in the figures folder) rather than as their gene names.
+
+2. Trying to add some sort of "metadata" tag to the anndata objects when they are read in from our files, and before they are combined.  This is to allow us to sort the cluster groups by day, rather than just "nearest neighbor" as it does now.
