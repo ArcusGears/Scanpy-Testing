@@ -13,14 +13,25 @@ import os
 sc.settings.verbosity = 3
 sc.logging.print_versions()
 results_file = pa.Path('./write/Combined.h5ad')  #file that will store analysis
-i = 0
-while os.path.exists('./write/figures%s.png' % i):
-	i += 1
-figure_file = open('figures%s.png' % i, 'w')
+#i = 0
+#while os.path.exists('./write/figures%s.png' % i):
+#	i += 1
+#figure_file = open('figures%s.png' % i, 'w')
 
 sc.settings.set_figure_params(dpi = 80)
 
 adata = sc.read_loom('PC9Combined.loom', var_names = 'gene_symbols', sparse = True, cleanup = False, X_name = 'spliced', obs_names = 'CellID')
+
+#day00a = sc.read_text("/home/alex/lab/drugres/DropSeqFiles/D0.1500.dge", delimiter = "\t")
+#day01 = sc.read_text("/home/alex/lab/drugres/DropSeqFiles/D1.txt.500.dge", delimiter = "\t")
+#day02 = sc.read_text("/home/alex/lab/drugres/DropSeqFiles/D2.txt.500.dge", delimiter = "\t")
+#day04 = sc.read_text("/home/alex/lab/drugres/DropSeqFiles/D4.txt.500.dge", delimiter = "\t")
+#day09 = sc.read_text("/home/alex/lab/drugres/DropSeqFiles/D9.txt.500.dge", delimiter = "\t")
+#day11a = sc.read_text("/home/alex/lab/drugres/DropSeqFiles/D11.txt.500.dge", delimiter = "\t")
+
+#Need add some sort of Day## meta tag to the day anndata objects before concatinating
+
+adata2 = anndata.concatenate(day00a, day01, day02, day04, day09, day11a, join = 'inner')
 
 adata.var_names_make_unique()  #unnecessary if using 'gene_ids'
 
@@ -48,7 +59,7 @@ sc.pl.violin(adata, ['n_genes', 'n_counts', 'percent_mito'], jitter = 0.4, multi
 
 #removing cells that have too many mitochondrial genes expressed or too many total counts
 sc.pl.scatter(adata, x = 'n_counts', y = 'percent_mito', save = True)
-sc.pl.scatter(adata, x = 'n_counts', y = 'n_genes', save = True)
+sc.pl.scatter(adata, x = 'n_counts', y = 'n_genes', save = "n_genes.pdf")
 
 adata
 
@@ -87,7 +98,7 @@ sc.pp.scale(adata, max_value = 10)
 sc.tl.pca(adata, svd_solver = 'arpack')
 
 #scatter plot in PCA coordinates
-sc.pl.pca(adata, color = 'CST3', save = True)
+sc.pl.pca(adata, save = True)
 
 #Contribution of single PCs to total variance
 #Consider how many PCs we should consider in order to computer the neighborhood relations of cells
@@ -104,6 +115,7 @@ adata
 #computing
 #consider changing to default valies or according to the PCs
 sc.pp.neighbors(adata, n_neighbors = 10, n_pcs = 40)
+#sc.pp.neighbors(adata, n_neighbors = 8, n_pcs = 40)
 
 #Embedding neighborhood graph
 
@@ -113,18 +125,19 @@ sc.pp.neighbors(adata, n_neighbors = 10, n_pcs = 40)
 #tl.umap(adata, init_pos = 'paga')
 
 sc.tl.umap(adata)
-sc.pl.umap(adata, color = ['CST3', 'NKG7', 'PPBP'], save = True)
+sc.pl.umap(adata, save = True)
 
 #plot not using the .raw
-sc.pl.umap(adata, color = ['SCT3', 'NKG7', 'PPBP'], use_raw = False, save = True)
+sc.pl.umap(adata, use_raw = False, save = "_raw.pdf")
 
 
 #clustering the graph
 #uses Louvain graph-clustered method
-sc.tl.louvain(adata)
+sc.tl.louvain(adata, resolution = 1.2)
 
 #plot
-sc.pl.umap(adata, color = ['louvain', 'CST3', 'NKG7'], sve = True)
+sc.pl.umap(adata, color = ['louvain'], save = "_louvain.pdf")
+#sc.pl.umap(adata, color = ['tech'], save = "_days.pdf")
 
 #save
 adata.write(results_file)
