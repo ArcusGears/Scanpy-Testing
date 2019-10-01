@@ -20,28 +20,41 @@ results_file = pa.Path('./write/Combined.h5ad')  #file that will store analysis
 
 sc.settings.set_figure_params(dpi = 80)
 
-adata = sc.read_loom('PC9Combined.loom', var_names = 'gene_symbols', sparse = True, cleanup = False, X_name = 'spliced', obs_names = 'CellID')
+#adata = sc.read_loom('PC9Combined.loom', var_names = 'gene_symbols', sparse = True, cleanup = False, X_name = 'spliced', obs_names = 'CellID')
 
-day00a = sc.read_text("/home/alex/lab/drugres/DropSeqFiles/D0.1500.dge", var_names = 'gene_symbols', delimiter = "\t")
-day01 = sc.read_text("/home/alex/lab/drugres/DropSeqFiles/D1.txt.500.dge", var_names = 'gene_symbols', delimiter = "\t")
-day02 = sc.read_text("/home/alex/lab/drugres/DropSeqFiles/D2.txt.500.dge", var_names = 'gene_symbols', delimiter = "\t")
-day04 = sc.read_text("/home/alex/lab/drugres/DropSeqFiles/D4.txt.500.dge", var_names = 'gene_symbols', delimiter = "\t")
-day09 = sc.read_text("/home/alex/lab/drugres/DropSeqFiles/D9.txt.500.dge", var_names = 'gene_symbols', delimiter = "\t")
-day11a = sc.read_text("/home/alex/lab/drugres/DropSeqFiles/D11.txt.500.dge", var_names = 'gene_symbols', delimiter = "\t")
+#day00a = sc.read_text("/home/alex/lab/drugres/DropSeqFiles/D0.1500.dge", var_names = 'gene_symbols', delimiter = "\t")
+#day01 = sc.read_text("/home/alex/lab/drugres/DropSeqFiles/D1.txt.500.dge", var_names = 'gene_symbols', delimiter = "\t")
+#day02 = sc.read_text("/home/alex/lab/drugres/DropSeqFiles/D2.txt.500.dge", var_names = 'gene_symbols', delimiter = "\t")
+#day04 = sc.read_text("/home/alex/lab/drugres/DropSeqFiles/D4.txt.500.dge", var_names = 'gene_symbols', delimiter = "\t")
+#day09 = sc.read_text("/home/alex/lab/drugres/DropSeqFiles/D9.txt.500.dge", var_names = 'gene_symbols', delimiter = "\t")
+#day11a = sc.read_text("/home/alex/lab/drugres/DropSeqFiles/D11.txt.500.dge", var_names = 'gene_symbols', delimiter = "\t")
 
-day00a = sc.read_loom('day00a.loom', var_names = 'gene_symbols', sparse = True, clearnup = False, X_name = 'spliced', obs_names = 'CellID')
+day00 = sc.read_loom('Day0.loom', var_names = 'gene_symbols', sparse = True, cleanup = False, X_name = 'spliced', obs_names = 'CellID')
+day01 = sc.read_loom('Day01.loom', var_names = 'gene_symbols', sparse = True, cleanup = False, X_name = 'spliced', obs_names = 'CellID')
+day02 = sc.read_loom('Day02.loom', var_names = 'gene_symbols', sparse = True, cleanup = False, X_name = 'spliced', obs_names = 'CellID')
+day04 = sc.read_loom('Day04.loom', var_names = 'gene_symbols', sparse = True, cleanup = False, X_name = 'spliced', obs_names = 'CellID')
+day09 = sc.read_loom('Day09.loom', var_names = 'gene_symbols', sparse = True, cleanup = False, X_name = 'spliced', obs_names = 'CellID')
+day11 = sc.read_loom('Day11.loom', var_names = 'gene_symbols', sparse = True, cleanup = False, X_name = 'spliced', obs_names = 'CellID')
 
 #Need add some sort of Day## meta tag to the day anndata objects before concatinating
 #anno = pd.read_csv() #I am unsure how to do this part, I want to add these to the .obs or the .uns (preferable .obs) part of the anndata object, but I cant seem to figure out how to write into it
-day00a.obs['tech'] = 'Day 0'
+#uns annotations don't seem to carry over after concatenation
+#day00.uns['tech'] = 'Day 0'
+#day01.uns['tech'] = 'Day 1'
+#day02.uns['tech'] = 'Day 2'
+#day04.uns['tech'] = 'Day 4'
+#day09.uns['tech'] = 'Day 9'
+#day11.uns['tech'] = 'Day 11'
+
+day00.obs['tech'] = 'Day 0'
 day01.obs['tech'] = 'Day 1'
 day02.obs['tech'] = 'Day 2'
 day04.obs['tech'] = 'Day 4'
 day09.obs['tech'] = 'Day 9'
-day11a.obs['tech'] = 'Day 11'
+day11.obs['tech'] = 'Day 11'
 
-adata_list = [day01, day02, day04, day09, day11a]
-adata2 = day00a.concatenate(adata_list, join = 'inner')
+adata_list = [day01, day02, day04, day09, day11]
+adata2 = day00.concatenate(adata_list, join = 'outer')
 adata = adata2
 
 adata.var_names_make_unique()  #unnecessary if using 'gene_ids'
@@ -79,7 +92,7 @@ adata = adata[adata.obs['n_genes'] < 2500, :]
 adata = adata[adata.obs['percent_mito'] < 0.05, :]
 
 #normalize cell data
-sc.pp.normalize_per_cell(adata, counts_per_cell_after = 1e4)
+sc.pp.normalize_total(adata, target_sum = 1e4)
 
 #logarithmize the data
 sc.pp.log1p(adata)
@@ -144,11 +157,12 @@ sc.pl.umap(adata, use_raw = False, save = "_raw.pdf")
 
 #clustering the graph
 #uses Louvain graph-clustered method
+#Louvain is saved as a uns annotation
 sc.tl.louvain(adata, resolution = 1.2)
 
 #plot
 sc.pl.umap(adata, color = ['louvain'], save = "_louvain.pdf")
-#sc.pl.umap(adata, color = ['tech'], save = "_days.pdf")
+sc.pl.umap(adata, color = ['tech'], save = "_by_day.pdf")
 
 #save
 adata.write(results_file)
